@@ -1,47 +1,8 @@
-
 import React, { useState, useMemo } from 'react';
-import { QUESTIONS, PERSONAS } from './constants';
-import { PersonaType, PersonaProfile, UserData } from './types';
+import { QUESTIONS, PERSONAS, QUIZ_CONFIG } from './constants';
+import { PersonaProfile, UserData } from './types';
 import { ChevronRight, ChevronLeft, Map, Compass, Send, RotateCcw, User, Mail, Briefcase, Building, Loader2 } from 'lucide-react';
 
-/**
- * GOOGLE APPS SCRIPT EXAMPLE:
- * 
- * function doPost(e) {
- *   // 1. LockService prevents data collision
- *   var lock = LockService.getScriptLock();
- *   lock.tryLock(10000);
- * 
- *   try {
- *     // 2. Open the specific sheet
- *     var ss = SpreadsheetApp.openById('1Txo2elpDWBzv75k2eAWcxppiZmc3rCGXaEAcIXsLs5Q');
- *     var sheet = ss.getSheetByName('Sheet1');
- * 
- *     // 3. Parse the incoming JSON data
- *     var data = JSON.parse(e.postData.contents);
- * 
- *     // 4. Append the row
- *     sheet.appendRow([
- *       new Date(),
- *       data.name,
- *       data.email,
- *       data.title,
- *       data.organization,
- *       data.innovationScore,
- *       data.coherenceScore,
- *       data.persona
- *     ]);
- * 
- *     return ContentService.createTextOutput(JSON.stringify({ result: "success" }))
- *       .setMimeType(ContentService.MimeType.JSON);
- *   } catch (error) {
- *     return ContentService.createTextOutput(JSON.stringify({ result: "error", error: error.toString() }))
- *       .setMimeType(ContentService.MimeType.JSON);
- *   } finally {
- *     lock.releaseLock();
- *   }
- * }
- */
 const SUBMISSION_ENDPOINT = '/api/submit';
 
 const App: React.FC = () => {
@@ -56,9 +17,7 @@ const App: React.FC = () => {
     organization: ''
   });
 
-  const handleStart = () => {
-    setStep('QUIZ');
-  };
+  const handleStart = () => setStep('QUIZ');
 
   const handleAnswer = (val: 'A' | 'B') => {
     setAnswers(prev => ({ ...prev, [QUESTIONS[currentQuestionIdx].id]: val }));
@@ -68,20 +27,14 @@ const App: React.FC = () => {
   };
 
   const handlePrev = () => {
-    if (currentQuestionIdx > 0) {
-      setCurrentQuestionIdx(prev => prev - 1);
-    }
+    if (currentQuestionIdx > 0) setCurrentQuestionIdx(prev => prev - 1);
   };
 
   const handleNext = () => {
-    if (answers[QUESTIONS[currentQuestionIdx].id]) {
-      setCurrentQuestionIdx(prev => prev + 1);
-    }
+    if (answers[QUESTIONS[currentQuestionIdx].id]) setCurrentQuestionIdx(prev => prev + 1);
   };
 
-  const goToForm = () => {
-    setStep('FORM');
-  };
+  const goToForm = () => setStep('FORM');
 
   const scores = useMemo(() => {
     let innovation = 0;
@@ -97,19 +50,14 @@ const App: React.FC = () => {
 
   const persona: PersonaProfile = useMemo(() => {
     const { innovation: inn, coherence: coh } = scores;
-    
     if (inn === 5 && coh === 5) return PERSONAS.WAYFINDER;
     if (inn >= 2 && inn <= 3 && coh >= 4) return PERSONAS.SURVEYOR;
     if (inn >= 4 && coh >= 2 && coh <= 3) return PERSONAS.SCOUT;
     if (inn >= 2 && inn <= 4 && coh <= 2) return PERSONAS.TRAILBLAZER;
     if (inn <= 2 && coh >= 4) return PERSONAS.SENTRY;
     if (inn <= 2 && coh <= 2) return PERSONAS.DRIFTER;
-
-    if (inn >= 3) {
-      return coh >= 3 ? PERSONAS.WAYFINDER : PERSONAS.SCOUT;
-    } else {
-      return coh >= 3 ? PERSONAS.SURVEYOR : PERSONAS.DRIFTER;
-    }
+    if (inn >= 3) return coh >= 3 ? PERSONAS.WAYFINDER : PERSONAS.SCOUT;
+    return coh >= 3 ? PERSONAS.SURVEYOR : PERSONAS.DRIFTER;
   }, [scores]);
 
   const handleFormSubmit = async (e: React.FormEvent) => {
@@ -117,7 +65,8 @@ const App: React.FC = () => {
     setIsSubmitting(true);
 
     const payload = {
-      ...userData, org: userData.organization,
+      ...userData,
+      org: userData.organization,
       innovationScore: scores.innovation,
       coherenceScore: scores.coherence,
       persona: persona.name,
@@ -127,22 +76,17 @@ const App: React.FC = () => {
     try {
       const response = await fetch(SUBMISSION_ENDPOINT, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
-
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || 'Submission failed');
       }
-      
       const result = await response.json();
       console.log('Submission successful:', result);
     } catch (error) {
       console.error('Submission failed:', error);
-      // We still move to the result page for UX, but log the error
     } finally {
       setIsSubmitting(false);
       setStep('RESULT');
@@ -163,10 +107,10 @@ const App: React.FC = () => {
           <div className="bg-brand-primary p-1.5 rounded-lg">
             <Compass className="text-white w-6 h-6" />
           </div>
-          <span className="font-bold text-slate-800 text-lg tracking-tight">Wayfinding Explorer</span>
+          <span className="font-bold text-slate-800 text-lg tracking-tight">{QUIZ_CONFIG.appName}</span>
         </div>
         {step !== 'WELCOME' && (
-          <button 
+          <button
             onClick={resetQuiz}
             className="text-slate-500 hover:text-brand-primary flex items-center gap-1.5 text-sm font-medium transition-colors"
           >
@@ -181,28 +125,24 @@ const App: React.FC = () => {
           <div className="text-center space-y-8 max-w-2xl mx-auto">
             <div className="space-y-4">
               <h1 className="text-4xl md:text-5xl font-display text-slate-900 leading-tight">
-                Navigating What’s Next: <br/><span className="text-brand-primary">Discover Your Persona</span>
+                {QUIZ_CONFIG.pageTitle}
               </h1>
               <p className="text-lg text-slate-600 leading-relaxed">
-                Move from "accumulation without alignment" toward a coherent, future-ready system. 
-                Identify your current explorer persona to better align your purpose and outcomes.
+                {QUIZ_CONFIG.pageSubtitle}
               </p>
             </div>
-
             <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 text-left space-y-6">
               <div className="flex gap-4">
                 <div className="bg-brand-accent/10 p-3 rounded-full h-fit">
                   <Map className="w-6 h-6 text-brand-primary" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-slate-900 text-lg">The Narrative: The Fog</h3>
-                  <p className="text-slate-600 mt-1">
-                    For generations, the educational path was well-worn. Today, a thick fog of complexity has settled. Wayfinding is the moment a team pulls out a new compass to read the terrain.
-                  </p>
+                  <h3 className="font-bold text-slate-900 text-lg">{QUIZ_CONFIG.narrativeTitle}</h3>
+                  <p className="text-slate-600 mt-1">{QUIZ_CONFIG.narrativeBody}</p>
                 </div>
               </div>
               <div className="pt-4">
-                <button 
+                <button
                   onClick={handleStart}
                   className="w-full bg-brand-primary hover:bg-brand-primary/90 text-white font-semibold py-4 px-8 rounded-xl flex items-center justify-center gap-2 transition-all transform hover:scale-[1.01] active:scale-[0.99] shadow-lg shadow-brand-primary/20"
                 >
@@ -222,7 +162,7 @@ const App: React.FC = () => {
                 <span>Question {currentQuestionIdx + 1} of {QUESTIONS.length}</span>
               </div>
               <div className="h-2 w-full bg-slate-200 rounded-full overflow-hidden">
-                <div 
+                <div
                   className="h-full bg-brand-primary transition-all duration-300 ease-out"
                   style={{ width: `${((currentQuestionIdx + 1) / QUESTIONS.length) * 100}%` }}
                 />
@@ -233,7 +173,6 @@ const App: React.FC = () => {
               <h2 className="text-2xl font-bold text-slate-900 mb-8">
                 {QUESTIONS[currentQuestionIdx].text}
               </h2>
-
               <div className="space-y-4 flex-grow">
                 {QUESTIONS[currentQuestionIdx].options.map((option) => (
                   <button
@@ -264,7 +203,6 @@ const App: React.FC = () => {
                   </button>
                 ))}
               </div>
-
               <div className="flex justify-between mt-10 pt-6 border-t border-slate-100">
                 <button
                   onClick={handlePrev}
@@ -302,8 +240,8 @@ const App: React.FC = () => {
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-xl mx-auto">
             <div className="bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden">
               <div className="bg-brand-primary py-8 px-8 text-center text-white">
-                <h2 className="text-2xl font-bold">Great progress!</h2>
-                <p className="opacity-90 mt-2 text-sm">Where should we send your detailed Innovation Persona report?</p>
+                <h2 className="text-2xl font-bold">{QUIZ_CONFIG.formHeading}</h2>
+                <p className="opacity-90 mt-2 text-sm">{QUIZ_CONFIG.formSubheading}</p>
               </div>
               <form onSubmit={handleFormSubmit} className="p-8 space-y-5">
                 <div className="space-y-1">
@@ -311,40 +249,32 @@ const App: React.FC = () => {
                   <div className="relative">
                     <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                     <input
-                      required
-                      type="text"
-                      placeholder="Jane Doe"
+                      required type="text" placeholder="Jane Doe"
                       className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-accent/50 focus:bg-white outline-none transition-all"
                       value={userData.name}
                       onChange={e => setUserData(prev => ({...prev, name: e.target.value}))}
                     />
                   </div>
                 </div>
-
                 <div className="space-y-1">
                   <label className="text-sm font-bold text-slate-700 block ml-1">Email Address</label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                     <input
-                      required
-                      type="email"
-                      placeholder="jane@organization.com"
+                      required type="email" placeholder="jane@organization.com"
                       className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-accent/50 focus:bg-white outline-none transition-all"
                       value={userData.email}
                       onChange={e => setUserData(prev => ({...prev, email: e.target.value}))}
                     />
                   </div>
                 </div>
-
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1">
                     <label className="text-sm font-bold text-slate-700 block ml-1">Professional Title</label>
                     <div className="relative">
                       <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                       <input
-                        required
-                        type="text"
-                        placeholder="Principal / Director"
+                        required type="text" placeholder="Principal / Director"
                         className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-accent/50 focus:bg-white outline-none transition-all"
                         value={userData.title}
                         onChange={e => setUserData(prev => ({...prev, title: e.target.value}))}
@@ -356,9 +286,7 @@ const App: React.FC = () => {
                     <div className="relative">
                       <Building className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                       <input
-                        required
-                        type="text"
-                        placeholder="Unified District 01"
+                        required type="text" placeholder="Unified District 01"
                         className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-accent/50 focus:bg-white outline-none transition-all"
                         value={userData.organization}
                         onChange={e => setUserData(prev => ({...prev, organization: e.target.value}))}
@@ -366,21 +294,19 @@ const App: React.FC = () => {
                     </div>
                   </div>
                 </div>
-
                 <div className="pt-4">
                   <button
-                    type="submit"
-                    disabled={isSubmitting}
+                    type="submit" disabled={isSubmitting}
                     className="w-full bg-brand-primary hover:bg-brand-primary/90 text-white font-bold py-4 rounded-xl shadow-lg shadow-brand-primary/20 transition-all flex items-center justify-center gap-2 group disabled:opacity-70 disabled:cursor-not-allowed"
                   >
                     {isSubmitting ? (
                       <>
                         <Loader2 className="w-5 h-5 animate-spin" />
-                        Analyzing Results...
+                        {QUIZ_CONFIG.formLoadingText}
                       </>
                     ) : (
                       <>
-                        Discover My Persona
+                        {QUIZ_CONFIG.formCta}
                         <Send className="w-5 h-5 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
                       </>
                     )}
@@ -392,7 +318,7 @@ const App: React.FC = () => {
               </form>
             </div>
             {!isSubmitting && (
-              <button 
+              <button
                 onClick={() => setStep('QUIZ')}
                 className="mt-6 flex items-center gap-2 text-slate-500 font-bold hover:text-brand-primary transition-colors mx-auto"
               >
@@ -419,73 +345,66 @@ const App: React.FC = () => {
                   <h4 className="text-sm font-bold text-brand-primary uppercase tracking-[0.2em]">Congratulations, {userData.name}!</h4>
                   <h1 className="text-4xl md:text-5xl font-display text-slate-900">{persona.name}</h1>
                   <p className="text-slate-500 font-medium italic">{persona.subtitle}</p>
-                  <p className="max-w-xl mx-auto text-slate-600 text-lg pt-4">
-                    {persona.description}
-                  </p>
+                  <p className="max-w-xl mx-auto text-slate-600 text-lg pt-4">{persona.description}</p>
                 </div>
-
                 <div className="mt-10 flex justify-center gap-8 md:gap-16">
                   <div className="text-center">
                     <div className="text-3xl font-bold text-slate-900">{scores.innovation}/5</div>
-                    <div className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Innovation Depth</div>
+                    <div className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">{QUIZ_CONFIG.score1Label}</div>
                   </div>
                   <div className="w-px bg-slate-100"></div>
                   <div className="text-center">
                     <div className="text-3xl font-bold text-slate-900">{scores.coherence}/5</div>
-                    <div className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">System Coherence</div>
+                    <div className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">{QUIZ_CONFIG.score2Label}</div>
                   </div>
                 </div>
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <ProfileCard title="Core Strengths" items={persona.strengths} color="text-emerald-600" bg="bg-emerald-50" />
-              <ProfileCard title="Potential Weaknesses" items={persona.weaknesses} color="text-rose-600" bg="bg-rose-50" />
-              <ProfileCard title="Strategic Opportunities" items={persona.opportunities} color="text-amber-600" bg="bg-amber-50" />
-              <ProfileCard title="Daily Habits" items={persona.habits} color="text-brand-primary" bg="bg-brand-accent/10" />
+              <ProfileCard title="Core Strengths"         items={persona.strengths}     color="text-emerald-600"      bg="bg-emerald-50" />
+              <ProfileCard title="Potential Weaknesses"   items={persona.weaknesses}    color="text-rose-600"         bg="bg-rose-50" />
+              <ProfileCard title="Strategic Opportunities" items={persona.opportunities} color="text-amber-600"        bg="bg-amber-50" />
+              <ProfileCard title="Daily Habits"           items={persona.habits}        color="text-brand-primary"    bg="bg-brand-accent/10" />
             </div>
 
             <div className="bg-slate-900 rounded-3xl p-8 md:p-12 text-white shadow-2xl relative overflow-hidden">
-               <div className="absolute top-0 right-0 p-8 opacity-10">
-                  <Compass className="w-32 h-32" />
-               </div>
-               <h3 className="text-2xl font-bold mb-8 flex items-center gap-3">
-                 <div className="bg-white/10 p-2 rounded-lg">
-                    <ChevronRight className="w-6 h-6" />
-                 </div>
-                 Your Journey Forward: Next Steps
-               </h3>
-               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                 {persona.nextSteps.map((step, idx) => (
-                   <div key={idx} className="flex gap-4 group">
-                     <span className="shrink-0 w-8 h-8 rounded-full bg-white/10 flex items-center justify-center font-bold text-sm text-brand-accent group-hover:bg-brand-accent group-hover:text-brand-primary transition-all">
-                       {idx + 1}
-                     </span>
-                     <p className="text-slate-300 group-hover:text-white transition-colors leading-relaxed">
-                       {step}
-                     </p>
-                   </div>
-                 ))}
-               </div>
-               <div className="mt-12 pt-8 border-t border-white/10 flex flex-col sm:flex-row gap-4 items-center justify-between">
-                  <p className="text-slate-400 text-sm italic">
-                    Wayfinding is a process, not a destination.
-                  </p>
-                  <button 
-                    onClick={resetQuiz}
-                    className="bg-white text-slate-900 px-8 py-3 rounded-xl font-bold hover:bg-slate-100 transition-colors flex items-center gap-2"
-                  >
-                    <RotateCcw className="w-5 h-5" />
-                    Take Quiz Again
-                  </button>
-               </div>
+              <div className="absolute top-0 right-0 p-8 opacity-10">
+                <Compass className="w-32 h-32" />
+              </div>
+              <h3 className="text-2xl font-bold mb-8 flex items-center gap-3">
+                <div className="bg-white/10 p-2 rounded-lg">
+                  <ChevronRight className="w-6 h-6" />
+                </div>
+                Your Journey Forward: Next Steps
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {persona.nextSteps.map((step, idx) => (
+                  <div key={idx} className="flex gap-4 group">
+                    <span className="shrink-0 w-8 h-8 rounded-full bg-white/10 flex items-center justify-center font-bold text-sm text-brand-accent group-hover:bg-brand-accent group-hover:text-brand-primary transition-all">
+                      {idx + 1}
+                    </span>
+                    <p className="text-slate-300 group-hover:text-white transition-colors leading-relaxed">{step}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-12 pt-8 border-t border-white/10 flex flex-col sm:flex-row gap-4 items-center justify-between">
+                <p className="text-slate-400 text-sm italic">{QUIZ_CONFIG.resultTagline}</p>
+                <button
+                  onClick={resetQuiz}
+                  className="bg-white text-slate-900 px-8 py-3 rounded-xl font-bold hover:bg-slate-100 transition-colors flex items-center gap-2"
+                >
+                  <RotateCcw className="w-5 h-5" />
+                  Take Quiz Again
+                </button>
+              </div>
             </div>
           </div>
         )}
       </main>
 
       <footer className="w-full py-8 text-center text-slate-400 text-sm border-t border-slate-100 mt-auto">
-        <p>© {new Date().getFullYear()} Wayfinding Explorer Quiz. Based on "Navigating What’s Next".</p>
+        <p>{QUIZ_CONFIG.footerText}</p>
       </footer>
     </div>
   );

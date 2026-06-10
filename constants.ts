@@ -1,6 +1,48 @@
-
 import { Question, PersonaProfile } from './types';
 
+// ─────────────────────────────────────────────────────────────────────────────
+// QUIZ CONFIG — the only section you edit when creating a new quiz variant.
+// App.tsx reads everything from here; no hardcoded strings anywhere else.
+// ─────────────────────────────────────────────────────────────────────────────
+export const QUIZ_CONFIG = {
+
+  // ── Branding ───────────────────────────────────────────────────────────────
+  appName:   "Wayfinding Explorer",
+  pageTitle: "Navigating What's Next: Discover Your Persona",
+  pageSubtitle:
+    "Move from \"accumulation without alignment\" toward a coherent, future-ready system. " +
+    "Identify your current explorer persona to better align your purpose and outcomes.",
+
+  // ── Welcome card narrative ─────────────────────────────────────────────────
+  narrativeTitle: "The Narrative: The Fog",
+  narrativeBody:
+    "For generations, the educational path was well-worn. Today, a thick fog of complexity " +
+    "has settled. Wayfinding is the moment a team pulls out a new compass to read the terrain.",
+
+  // ── Form header ────────────────────────────────────────────────────────────
+  formHeading:    "Great progress!",
+  formSubheading: "Where should we send your detailed Innovation Persona report?",
+  formCta:        "Discover My Persona",
+  formLoadingText: "Analyzing Results...",
+
+  // ── Result page ────────────────────────────────────────────────────────────
+  resultTagline: "Wayfinding is a process, not a destination.",
+  score1Label:   "Innovation Depth",
+  score2Label:   "System Coherence",
+
+  // ── Footer ─────────────────────────────────────────────────────────────────
+  footerText: `© ${new Date().getFullYear()} Wayfinding Explorer Quiz. Based on "Navigating What's Next".`,
+
+  // ── Mailchimp tag applied to all completions ───────────────────────────────
+  // Must match MAILCHIMP_TAG_NAME env var (or this overrides the default)
+  completionTag: "Explorer Assessment",
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// QUESTIONS
+// category drives the 2-axis scoring: INNOVATION score = count of 'B' in
+// INNOVATION questions; COHERENCE score = count of 'B' in COHERENCE questions.
+// ─────────────────────────────────────────────────────────────────────────────
 export const QUESTIONS: Question[] = [
   // Part I: Innovation Depth
   {
@@ -96,6 +138,9 @@ export const QUESTIONS: Question[] = [
   }
 ];
 
+// ─────────────────────────────────────────────────────────────────────────────
+// PERSONAS
+// ─────────────────────────────────────────────────────────────────────────────
 export const PERSONAS: Record<string, PersonaProfile> = {
   DRIFTER: {
     id: 'DRIFTER',
