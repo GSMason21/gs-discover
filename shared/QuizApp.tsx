@@ -4,7 +4,7 @@ import {
   ChevronRight, ChevronLeft, Compass, Lightbulb,
   Send, RotateCcw, User, Mail, Briefcase, Building, Loader2
 } from 'lucide-react';
-import GSLogo from '../public/logo-teal.svg?url';
+import GSLogo from './logo-teal.svg?url';
 
 interface QuizAppProps {
   config: QuizConfig;
