@@ -91,18 +91,30 @@ export const QuizApp: React.FC<QuizAppProps> = ({ config, questions, personas })
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col items-center">
       {/* Header */}
-      <header className="w-full bg-white border-b border-slate-200 py-4 px-6 flex justify-between items-center sticky top-0 z-50">
-        <div className="flex items-center gap-2">
-          <div className="bg-brand-primary p-1.5 rounded-lg">
-            <Compass className="text-white w-6 h-6" />
-          </div>
-          <span className="font-bold text-slate-800 text-lg tracking-tight">{config.appName}</span>
+      <header className="w-full bg-white border-b border-slate-200 py-3 px-6 flex justify-between items-center sticky top-0 z-50">
+        {/* Logo */}
+        <a href="https://www.gettingsmart.com" target="_blank" rel="noopener noreferrer" className="flex items-center">
+          <img src="/logo-teal.svg" alt="Getting Smart" className="h-8 w-auto" />
+        </a>
+
+        {/* Right side */}
+        <div className="flex items-center gap-3">
+          {step !== 'WELCOME' && (
+            <button onClick={reset} className="text-slate-500 hover:text-brand-primary flex items-center gap-1.5 text-sm font-medium transition-colors">
+              <RotateCcw className="w-4 h-4" />
+              <span className="hidden sm:inline">Restart</span>
+            </button>
+          )}
+          <a
+            href="https://www.gettingsmart.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 text-xs font-medium text-slate-600 hover:text-brand-primary border border-slate-200 hover:border-brand-accent rounded-full px-3 py-1.5 transition-all hover:bg-teal-50 whitespace-nowrap"
+          >
+            <ChevronLeft className="w-3.5 h-3.5" />
+            GettingSmart.com
+          </a>
         </div>
-        {step !== 'WELCOME' && (
-          <button onClick={reset} className="text-slate-500 hover:text-brand-primary flex items-center gap-1.5 text-sm font-medium transition-colors">
-            <RotateCcw className="w-4 h-4" /> Restart
-          </button>
-        )}
       </header>
 
       <main className="w-full max-w-3xl px-4 py-8 md:py-16">
