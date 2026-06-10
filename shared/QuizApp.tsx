@@ -4,6 +4,7 @@ import {
   ChevronRight, ChevronLeft, Compass, Lightbulb,
   Send, RotateCcw, User, Mail, Briefcase, Building, Loader2
 } from 'lucide-react';
+import GSLogo from '../public/logo-teal.svg?url';
 
 interface QuizAppProps {
   config: QuizConfig;
@@ -94,7 +95,7 @@ export const QuizApp: React.FC<QuizAppProps> = ({ config, questions, personas })
       <header className="w-full bg-white border-b border-slate-200 py-3 px-6 flex justify-between items-center sticky top-0 z-50">
         {/* Logo */}
         <a href="https://www.gettingsmart.com" target="_blank" rel="noopener noreferrer" className="flex items-center">
-          <img src="/logo-teal.svg" alt="Getting Smart" className="h-8 w-auto" />
+          <img src={GSLogo} alt="Getting Smart" className="h-8 w-auto" />
         </a>
 
         {/* Right side */}
