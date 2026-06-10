@@ -28,7 +28,17 @@ export default async function handler(req, res) {
   if (req.method === "OPTIONS") return res.status(200).end();
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
-  const { name, email, title, organization, innovationScore, coherenceScore, persona, timestamp } = req.body;
+  // Parse body manually for Vercel serverless
+  let parsed;
+  try {
+    const chunks = [];
+    for await (const chunk of req) chunks.push(chunk);
+    parsed = JSON.parse(Buffer.concat(chunks).toString());
+  } catch (e) {
+    return res.status(400).json({ error: "Invalid JSON body" });
+  }
+
+  const { name, email, title, organization, innovationScore, coherenceScore, persona, timestamp } = parsed;
 
   if (!email) return res.status(400).json({ error: "email is required" });
 
