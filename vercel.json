@@ -1,14 +1,14 @@
 {
   "buildCommand": "npm install && npx vite build",
   "outputDirectory": "dist",
-  "framework": "vite",
-  "functions": {
-    "api/submit.js": {
-      "includeFiles": "api/**"
-    }
-  },
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/$1" },
-    { "source": "/((?!assets/).*)", "destination": "/index.html" }
+    { "source": "/innovation-explorer/(.*)", "destination": "/quizzes/innovation-explorer/$1" },
+    { "source": "/leadership/(.*)",          "destination": "/quizzes/leadership/$1" },
+    { "source": "/innovation-explorer",      "destination": "/quizzes/innovation-explorer/index.html" },
+    { "source": "/leadership",               "destination": "/quizzes/leadership/index.html" }
+  ],
+  "redirects": [
+    { "source": "/", "destination": "https://www.gettingsmart.com", "permanent": true }
   ]
 }

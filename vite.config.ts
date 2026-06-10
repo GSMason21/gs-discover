@@ -1,24 +1,22 @@
-import path from 'path';
-import { defineConfig, loadEnv } from 'vite';
+import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import tailwindcss from '@tailwindcss/vite';
+import { resolve } from 'path';
 
-export default defineConfig(({ mode }) => {
-    const env = loadEnv(mode, '.', '');
-    return {
-      server: {
-        port: 3000,
-        host: '0.0.0.0',
+// ─────────────────────────────────────────────────────────────────────────────
+// Multi-page app config.
+// To add a new quiz: add one entry here pointing to quizzes/[slug]/index.html
+// ─────────────────────────────────────────────────────────────────────────────
+export default defineConfig({
+  plugins: [react()],
+  build: {
+    rollupOptions: {
+      input: {
+        // Root redirect page
+        main: resolve(__dirname, 'index.html'),
+        // Quizzes — add new entries here
+        'innovation-explorer': resolve(__dirname, 'quizzes/innovation-explorer/index.html'),
+        'leadership':          resolve(__dirname, 'quizzes/leadership/index.html'),
       },
-      plugins: [react(), tailwindcss()],
-      define: {
-        'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
-        'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY)
-      },
-      resolve: {
-        alias: {
-          '@': path.resolve(__dirname, '.'),
-        }
-      }
-    };
+    },
+  },
 });

@@ -1,20 +1,26 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
-</div>
+# gs-discover
 
-# Run and deploy your AI Studio app
+Multi-quiz platform for discover.gettingsmart.com
 
-This contains everything you need to run your app locally.
+## URLs
+- `discover.gettingsmart.com/innovation-explorer`
+- `discover.gettingsmart.com/leadership`
+- `discover.gettingsmart.com` → redirects to gettingsmart.com
 
-View your app in AI Studio: https://ai.studio/apps/73c1337f-21ea-4acd-b485-00095d21e3dc
+## Adding a new quiz
+1. `cp -r quizzes/leadership quizzes/new-quiz-slug`
+2. Edit `quizzes/new-quiz-slug/constants.ts` — update QUIZ_CONFIG, QUESTIONS, PERSONAS
+3. Add entry to `vite.config.ts` inputs
+4. Add rewrite rule to `vercel.json`
+5. Push — Vercel auto-deploys
 
-## Run Locally
+## Env vars (set in Vercel project settings)
+- MAILCHIMP_API_KEY
+- MAILCHIMP_SERVER_PREFIX  (e.g. us21)
+- MAILCHIMP_AUDIENCE_ID    (e.g. 17bb008ec3)
 
-**Prerequisites:**  Node.js
-
-
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+## Local dev
+```bash
+npm install
+npm run dev
+```
