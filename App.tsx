@@ -117,7 +117,7 @@ const App: React.FC = () => {
     setIsSubmitting(true);
 
     const payload = {
-      ...userData,
+      ...userData, org: userData.organization,
       innovationScore: scores.innovation,
       coherenceScore: scores.coherence,
       persona: persona.name,
