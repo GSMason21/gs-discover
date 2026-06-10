@@ -1,86 +1,91 @@
-import crypto from "crypto";
+import { createHash } from "crypto";
 
 export const config = {
   api: {
-    bodyParser: {
-      sizeLimit: '1mb',
-    },
+    bodyParser: true,
   },
 };
-
-function md5(str) {
-  return crypto.createHash("md5").update(str.toLowerCase()).digest("hex");
-}
-
-async function mailchimpRequest(method, path, body, apiKey, server) {
-  const url = `https://${server}.api.mailchimp.com/3.0${path}`;
-  const res = await fetch(url, {
-    method,
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Basic ${Buffer.from(`anystring:${apiKey}`).toString("base64")}`,
-    },
-    body: body ? JSON.stringify(body) : undefined,
-  });
-  const data = await res.json();
-  if (!res.ok && res.status !== 400) {
-    throw new Error(`Mailchimp ${method} ${path} → ${res.status}: ${data.detail || data.title}`);
-  }
-  return { status: res.status, data };
-}
 
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
   if (req.method === "OPTIONS") return res.status(200).end();
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
-  const { name, email, title, organization, innovationScore, coherenceScore, persona, timestamp } = req.body;
-
-  if (!email) return res.status(400).json({ error: "email is required" });
-
-  const API_KEY  = process.env.MAILCHIMP_API_KEY;
-  const SERVER   = process.env.MAILCHIMP_SERVER_PREFIX;
-  const LIST_ID  = process.env.MAILCHIMP_AUDIENCE_ID;
-  const TAG_NAME = process.env.MAILCHIMP_TAG_NAME || "Innovation Explorer";
-
-  if (!API_KEY || !SERVER || !LIST_ID) {
-    return res.status(500).json({ error: "Server configuration error" });
+  let body = req.body;
+  if (typeof body === "string") {
+    try { body = JSON.parse(body); } catch(e) {
+      return res.status(400).json({ error: "Invalid JSON body" });
+    }
   }
 
-  const [firstName, ...rest] = (name || "").trim().split(" ");
-  const lastName = rest.join(" ");
-  const subscriberHash = md5(email);
+  if (!body) return res.status(400).json({ error: "Empty request body" });
+
+  const { name, email, title, org, persona, innovationScore, coherenceScore } = body;
+  if (!email || !name) return res.status(400).json({ error: "Name and email are required" });
+
+  const API_KEY = process.env.MAILCHIMP_API_KEY;
+  const SERVER = process.env.MAILCHIMP_SERVER_PREFIX;
+  const AUDIENCE_ID = process.env.MAILCHIMP_AUDIENCE_ID;
+
+  if (!API_KEY || !SERVER || !AUDIENCE_ID) {
+    return res.status(500).json({ error: "Missing environment variables" });
+  }
+
+  const nameParts = name.trim().split(" ");
+  const firstName = nameParts[0];
+  const lastName = nameParts.slice(1).join(" ") || "";
+  const emailLower = email.toLowerCase().trim();
+  const emailHash = createHash("md5").update(emailLower).digest("hex");
+  const authHeader = "Basic " + btoa("anystring:" + API_KEY);
+  const baseUrl = `https://${SERVER}.api.mailchimp.com/3.0/lists/${AUDIENCE_ID}/members`;
 
   try {
-    await mailchimpRequest("PUT", `/lists/${LIST_ID}/members/${subscriberHash}`, {
-      email_address: email,
-      status_if_new: "subscribed",
-      merge_fields: {
-        FNAME:    firstName    || "",
-        LNAME:    lastName     || "",
-        JOBTITLE: title        || "",
-        COMPANY:  organization || "",
-        PERSONA:  persona      || "",
-      },
-    }, API_KEY, SERVER);
+    const upsertRes = await fetch(`${baseUrl}/${encodeURIComponent(emailLower)}`, {
+      method: "PUT",
+      headers: { Authorization: authHeader, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email_address: emailLower,
+        status_if_new: "subscribed",
+        status: "subscribed",
+        merge_fields: {
+          FNAME: firstName,
+          LNAME: lastName,
+          TITLE: title || "",
+          ORG: org || "",
+          PERSONA: persona || "",
+          INNO_SCORE: String(innovationScore ?? ""),
+          COH_SCORE: String(coherenceScore ?? ""),
+        },
+      }),
+    });
 
-    await mailchimpRequest("POST", `/lists/${LIST_ID}/members/${subscriberHash}/tags`, {
-      tags: [
-        { name: TAG_NAME,              status: "active" },
-        { name: `Persona: ${persona}`, status: "active" },
-      ],
-    }, API_KEY, SERVER);
+    const upsertData = await upsertRes.json();
+    if (!upsertRes.ok) {
+      return res.status(500).json({ error: upsertData.detail || "Failed to add subscriber", detail: upsertData });
+    }
 
-    await mailchimpRequest("POST", `/lists/${LIST_ID}/members/${subscriberHash}/notes`, {
-      note: `Innovation Explorer Quiz\nPersona: ${persona}\nInnovation Score: ${innovationScore}/5\nCoherence Score: ${coherenceScore}/5\nSubmitted: ${timestamp || new Date().toISOString()}`,
-    }, API_KEY, SERVER).catch(err => console.warn("Note failed:", err.message));
+    const tagRes = await fetch(`${baseUrl}/${emailHash}/tags`, {
+      method: "POST",
+      headers: { Authorization: authHeader, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        tags: [
+          { name: "Explorer Assessment", status: "active" },
+          { name: `Persona: ${persona}`, status: "active" },
+        ],
+      }),
+    });
 
-    return res.status(200).json({ result: "success" });
+    if (!tagRes.ok) {
+      const tagData = await tagRes.json();
+      return res.status(500).json({ error: "Member added but tagging failed", detail: tagData });
+    }
+
+    return res.status(200).json({ success: true });
 
   } catch (err) {
-    console.error("Mailchimp error:", err.message);
-    return res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: "Server error: " + err.message });
   }
 }
