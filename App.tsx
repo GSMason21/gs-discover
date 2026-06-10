@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { QUESTIONS, PERSONAS, QUIZ_CONFIG } from './constants';
 import { PersonaProfile, UserData } from './types';
-import { ChevronRight, ChevronLeft, Map, Compass, Send, RotateCcw, User, Mail, Briefcase, Building, Loader2 } from 'lucide-react';
+import { ChevronRight, ChevronLeft, Compass, Send, RotateCcw, User, Mail, Briefcase, Building, Loader2, Lightbulb } from 'lucide-react';
 
 const SUBMISSION_ENDPOINT = '/api/submit';
 
@@ -36,29 +36,18 @@ const App: React.FC = () => {
 
   const goToForm = () => setStep('FORM');
 
-  const scores = useMemo(() => {
-    let innovation = 0;
-    let coherence = 0;
+  // ── Profile scoring: count 'B' answers per category, highest wins ──────────
+  const persona: PersonaProfile = useMemo(() => {
+    const tally: Record<string, number> = {};
     QUESTIONS.forEach(q => {
       if (answers[q.id] === 'B') {
-        if (q.category === 'INNOVATION') innovation++;
-        if (q.category === 'COHERENCE') coherence++;
+        tally[q.category] = (tally[q.category] || 0) + 1;
       }
     });
-    return { innovation, coherence };
+    const winner = Object.entries(tally).sort((a, b) => b[1] - a[1])[0];
+    const key = winner ? winner[0] : Object.keys(PERSONAS)[0];
+    return PERSONAS[key] || Object.values(PERSONAS)[0];
   }, [answers]);
-
-  const persona: PersonaProfile = useMemo(() => {
-    const { innovation: inn, coherence: coh } = scores;
-    if (inn === 5 && coh === 5) return PERSONAS.WAYFINDER;
-    if (inn >= 2 && inn <= 3 && coh >= 4) return PERSONAS.SURVEYOR;
-    if (inn >= 4 && coh >= 2 && coh <= 3) return PERSONAS.SCOUT;
-    if (inn >= 2 && inn <= 4 && coh <= 2) return PERSONAS.TRAILBLAZER;
-    if (inn <= 2 && coh >= 4) return PERSONAS.SENTRY;
-    if (inn <= 2 && coh <= 2) return PERSONAS.DRIFTER;
-    if (inn >= 3) return coh >= 3 ? PERSONAS.WAYFINDER : PERSONAS.SCOUT;
-    return coh >= 3 ? PERSONAS.SURVEYOR : PERSONAS.DRIFTER;
-  }, [scores]);
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,8 +56,6 @@ const App: React.FC = () => {
     const payload = {
       ...userData,
       org: userData.organization,
-      innovationScore: scores.innovation,
-      coherenceScore: scores.coherence,
       persona: persona.name,
       timestamp: new Date().toISOString()
     };
@@ -83,8 +70,7 @@ const App: React.FC = () => {
         const errorData = await response.json();
         throw new Error(errorData.error || 'Submission failed');
       }
-      const result = await response.json();
-      console.log('Submission successful:', result);
+      console.log('Submission successful');
     } catch (error) {
       console.error('Submission failed:', error);
     } finally {
@@ -110,10 +96,7 @@ const App: React.FC = () => {
           <span className="font-bold text-slate-800 text-lg tracking-tight">{QUIZ_CONFIG.appName}</span>
         </div>
         {step !== 'WELCOME' && (
-          <button
-            onClick={resetQuiz}
-            className="text-slate-500 hover:text-brand-primary flex items-center gap-1.5 text-sm font-medium transition-colors"
-          >
+          <button onClick={resetQuiz} className="text-slate-500 hover:text-brand-primary flex items-center gap-1.5 text-sm font-medium transition-colors">
             <RotateCcw className="w-4 h-4" />
             Restart
           </button>
@@ -121,20 +104,20 @@ const App: React.FC = () => {
       </header>
 
       <main className="w-full max-w-3xl px-4 py-8 md:py-16">
+
+        {/* ── WELCOME ── */}
         {step === 'WELCOME' && (
           <div className="text-center space-y-8 max-w-2xl mx-auto">
             <div className="space-y-4">
               <h1 className="text-4xl md:text-5xl font-display text-slate-900 leading-tight">
                 {QUIZ_CONFIG.pageTitle}
               </h1>
-              <p className="text-lg text-slate-600 leading-relaxed">
-                {QUIZ_CONFIG.pageSubtitle}
-              </p>
+              <p className="text-lg text-slate-600 leading-relaxed">{QUIZ_CONFIG.pageSubtitle}</p>
             </div>
             <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 text-left space-y-6">
               <div className="flex gap-4">
                 <div className="bg-brand-accent/10 p-3 rounded-full h-fit">
-                  <Map className="w-6 h-6 text-brand-primary" />
+                  <Lightbulb className="w-6 h-6 text-brand-primary" />
                 </div>
                 <div>
                   <h3 className="font-bold text-slate-900 text-lg">{QUIZ_CONFIG.narrativeTitle}</h3>
@@ -146,7 +129,7 @@ const App: React.FC = () => {
                   onClick={handleStart}
                   className="w-full bg-brand-primary hover:bg-brand-primary/90 text-white font-semibold py-4 px-8 rounded-xl flex items-center justify-center gap-2 transition-all transform hover:scale-[1.01] active:scale-[0.99] shadow-lg shadow-brand-primary/20"
                 >
-                  Start Your Journey
+                  Discover My Leadership Persona
                   <ChevronRight className="w-5 h-5" />
                 </button>
               </div>
@@ -154,6 +137,7 @@ const App: React.FC = () => {
           </div>
         )}
 
+        {/* ── QUIZ ── */}
         {step === 'QUIZ' && (
           <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="space-y-2">
@@ -194,8 +178,7 @@ const App: React.FC = () => {
                       </span>
                       <p className={`text-lg font-medium ${
                         answers[QUESTIONS[currentQuestionIdx].id] === option.value
-                          ? 'text-brand-primary'
-                          : 'text-slate-700'
+                          ? 'text-brand-primary' : 'text-slate-700'
                       }`}>
                         {option.text}
                       </p>
@@ -216,9 +199,9 @@ const App: React.FC = () => {
                   <button
                     onClick={goToForm}
                     disabled={!answers[QUESTIONS[currentQuestionIdx].id]}
-                    className="flex items-center gap-2 px-10 py-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold transition-all disabled:opacity-50 shadow-lg shadow-emerald-50"
+                    className="flex items-center gap-2 px-10 py-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold transition-all disabled:opacity-50 shadow-lg"
                   >
-                    Complete Quiz
+                    Complete Assessment
                     <ChevronRight className="w-5 h-5" />
                   </button>
                 ) : (
@@ -236,6 +219,7 @@ const App: React.FC = () => {
           </div>
         )}
 
+        {/* ── FORM ── */}
         {step === 'FORM' && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-xl mx-auto">
             <div className="bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden">
@@ -248,67 +232,52 @@ const App: React.FC = () => {
                   <label className="text-sm font-bold text-slate-700 block ml-1">Full Name</label>
                   <div className="relative">
                     <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                    <input
-                      required type="text" placeholder="Jane Doe"
+                    <input required type="text" placeholder="Jane Doe"
                       className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-accent/50 focus:bg-white outline-none transition-all"
                       value={userData.name}
-                      onChange={e => setUserData(prev => ({...prev, name: e.target.value}))}
-                    />
+                      onChange={e => setUserData(prev => ({...prev, name: e.target.value}))} />
                   </div>
                 </div>
                 <div className="space-y-1">
                   <label className="text-sm font-bold text-slate-700 block ml-1">Email Address</label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                    <input
-                      required type="email" placeholder="jane@organization.com"
+                    <input required type="email" placeholder="jane@district.org"
                       className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-accent/50 focus:bg-white outline-none transition-all"
                       value={userData.email}
-                      onChange={e => setUserData(prev => ({...prev, email: e.target.value}))}
-                    />
+                      onChange={e => setUserData(prev => ({...prev, email: e.target.value}))} />
                   </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <label className="text-sm font-bold text-slate-700 block ml-1">Professional Title</label>
+                    <label className="text-sm font-bold text-slate-700 block ml-1">Role / Title</label>
                     <div className="relative">
                       <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                      <input
-                        required type="text" placeholder="Principal / Director"
+                      <input required type="text" placeholder="Principal / Superintendent"
                         className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-accent/50 focus:bg-white outline-none transition-all"
                         value={userData.title}
-                        onChange={e => setUserData(prev => ({...prev, title: e.target.value}))}
-                      />
+                        onChange={e => setUserData(prev => ({...prev, title: e.target.value}))} />
                     </div>
                   </div>
                   <div className="space-y-1">
                     <label className="text-sm font-bold text-slate-700 block ml-1">Organization</label>
                     <div className="relative">
                       <Building className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                      <input
-                        required type="text" placeholder="Unified District 01"
+                      <input required type="text" placeholder="School District"
                         className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-accent/50 focus:bg-white outline-none transition-all"
                         value={userData.organization}
-                        onChange={e => setUserData(prev => ({...prev, organization: e.target.value}))}
-                      />
+                        onChange={e => setUserData(prev => ({...prev, organization: e.target.value}))} />
                     </div>
                   </div>
                 </div>
                 <div className="pt-4">
-                  <button
-                    type="submit" disabled={isSubmitting}
+                  <button type="submit" disabled={isSubmitting}
                     className="w-full bg-brand-primary hover:bg-brand-primary/90 text-white font-bold py-4 rounded-xl shadow-lg shadow-brand-primary/20 transition-all flex items-center justify-center gap-2 group disabled:opacity-70 disabled:cursor-not-allowed"
                   >
                     {isSubmitting ? (
-                      <>
-                        <Loader2 className="w-5 h-5 animate-spin" />
-                        {QUIZ_CONFIG.formLoadingText}
-                      </>
+                      <><Loader2 className="w-5 h-5 animate-spin" />{QUIZ_CONFIG.formLoadingText}</>
                     ) : (
-                      <>
-                        {QUIZ_CONFIG.formCta}
-                        <Send className="w-5 h-5 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-                      </>
+                      <>{QUIZ_CONFIG.formCta}<Send className="w-5 h-5 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" /></>
                     )}
                   </button>
                   <p className="text-[10px] text-slate-400 text-center mt-4 uppercase tracking-tighter">
@@ -318,8 +287,7 @@ const App: React.FC = () => {
               </form>
             </div>
             {!isSubmitting && (
-              <button
-                onClick={() => setStep('QUIZ')}
+              <button onClick={() => setStep('QUIZ')}
                 className="mt-6 flex items-center gap-2 text-slate-500 font-bold hover:text-brand-primary transition-colors mx-auto"
               >
                 <ChevronLeft className="w-5 h-5" />
@@ -329,6 +297,7 @@ const App: React.FC = () => {
           </div>
         )}
 
+        {/* ── RESULT ── */}
         {step === 'RESULT' && (
           <div className="space-y-12 animate-in fade-in zoom-in-95 duration-700">
             <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-slate-100">
@@ -342,30 +311,19 @@ const App: React.FC = () => {
                   </div>
                 </div>
                 <div className="text-center space-y-2">
-                  <h4 className="text-sm font-bold text-brand-primary uppercase tracking-[0.2em]">Congratulations, {userData.name}!</h4>
+                  <h4 className="text-sm font-bold text-brand-primary uppercase tracking-[0.2em]">Your Leadership Persona, {userData.name}</h4>
                   <h1 className="text-4xl md:text-5xl font-display text-slate-900">{persona.name}</h1>
                   <p className="text-slate-500 font-medium italic">{persona.subtitle}</p>
                   <p className="max-w-xl mx-auto text-slate-600 text-lg pt-4">{persona.description}</p>
-                </div>
-                <div className="mt-10 flex justify-center gap-8 md:gap-16">
-                  <div className="text-center">
-                    <div className="text-3xl font-bold text-slate-900">{scores.innovation}/5</div>
-                    <div className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">{QUIZ_CONFIG.score1Label}</div>
-                  </div>
-                  <div className="w-px bg-slate-100"></div>
-                  <div className="text-center">
-                    <div className="text-3xl font-bold text-slate-900">{scores.coherence}/5</div>
-                    <div className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">{QUIZ_CONFIG.score2Label}</div>
-                  </div>
                 </div>
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <ProfileCard title="Core Strengths"         items={persona.strengths}     color="text-emerald-600"      bg="bg-emerald-50" />
-              <ProfileCard title="Potential Weaknesses"   items={persona.weaknesses}    color="text-rose-600"         bg="bg-rose-50" />
-              <ProfileCard title="Strategic Opportunities" items={persona.opportunities} color="text-amber-600"        bg="bg-amber-50" />
-              <ProfileCard title="Daily Habits"           items={persona.habits}        color="text-brand-primary"    bg="bg-brand-accent/10" />
+              <ProfileCard title="Core Strengths"          items={persona.strengths}     color="text-emerald-600"   bg="bg-emerald-50" />
+              <ProfileCard title="Watch-Outs"              items={persona.weaknesses}    color="text-rose-600"      bg="bg-rose-50" />
+              <ProfileCard title="Strategic Opportunities" items={persona.opportunities} color="text-amber-600"     bg="bg-amber-50" />
+              <ProfileCard title="Leadership Habits"       items={persona.habits}        color="text-brand-primary" bg="bg-brand-accent/10" />
             </div>
 
             <div className="bg-slate-900 rounded-3xl p-8 md:p-12 text-white shadow-2xl relative overflow-hidden">
@@ -376,7 +334,7 @@ const App: React.FC = () => {
                 <div className="bg-white/10 p-2 rounded-lg">
                   <ChevronRight className="w-6 h-6" />
                 </div>
-                Your Journey Forward: Next Steps
+                Your Next Steps
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {persona.nextSteps.map((step, idx) => (
@@ -390,12 +348,11 @@ const App: React.FC = () => {
               </div>
               <div className="mt-12 pt-8 border-t border-white/10 flex flex-col sm:flex-row gap-4 items-center justify-between">
                 <p className="text-slate-400 text-sm italic">{QUIZ_CONFIG.resultTagline}</p>
-                <button
-                  onClick={resetQuiz}
+                <button onClick={resetQuiz}
                   className="bg-white text-slate-900 px-8 py-3 rounded-xl font-bold hover:bg-slate-100 transition-colors flex items-center gap-2"
                 >
                   <RotateCcw className="w-5 h-5" />
-                  Take Quiz Again
+                  Take Assessment Again
                 </button>
               </div>
             </div>

@@ -1,348 +1,400 @@
 import { Question, PersonaProfile } from './types';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// QUIZ CONFIG — the only section you edit when creating a new quiz variant.
-// App.tsx reads everything from here; no hardcoded strings anywhere else.
+// QUIZ CONFIG — edit this block to rebrand for a new quiz variant.
 // ─────────────────────────────────────────────────────────────────────────────
 export const QUIZ_CONFIG = {
 
   // ── Branding ───────────────────────────────────────────────────────────────
-  appName:   "Wayfinding Explorer",
-  pageTitle: "Navigating What's Next: Discover Your Persona",
+  appName:    "Leadership Persona Explorer",
+  pageTitle:  "What Kind of Leader Are You in the Age of Generation Alpha?",
   pageSubtitle:
-    "Move from \"accumulation without alignment\" toward a coherent, future-ready system. " +
-    "Identify your current explorer persona to better align your purpose and outcomes.",
+    "Six big shifts are reshaping education. Discover the leadership persona your " +
+    "system needs from you right now — and the competencies to lean into.",
 
   // ── Welcome card narrative ─────────────────────────────────────────────────
-  narrativeTitle: "The Narrative: The Fog",
+  narrativeTitle: "Leading Through the Melt",
   narrativeBody:
-    "For generations, the educational path was well-worn. Today, a thick fog of complexity " +
-    "has settled. Wayfinding is the moment a team pulls out a new compass to read the terrain.",
+    "Superintendents, principals, and teachers are holding systems together while the " +
+    "ground shifts beneath their feet. This assessment helps you identify your dominant " +
+    "leadership persona — and the concrete steps to lead strong through rapid change.",
 
   // ── Form header ────────────────────────────────────────────────────────────
-  formHeading:    "Great progress!",
-  formSubheading: "Where should we send your detailed Innovation Persona report?",
-  formCta:        "Discover My Persona",
-  formLoadingText: "Analyzing Results...",
+  formHeading:     "You're almost there!",
+  formSubheading:  "Where should we send your leadership persona report?",
+  formCta:         "Discover My Leadership Persona",
+  formLoadingText: "Analyzing your responses...",
 
   // ── Result page ────────────────────────────────────────────────────────────
-  resultTagline: "Wayfinding is a process, not a destination.",
-  score1Label:   "Innovation Depth",
-  score2Label:   "System Coherence",
+  resultTagline: "Great leadership isn't a destination — it's a daily practice.",
+  score1Label:   "",   // not used in profile scoring mode
+  score2Label:   "",
 
   // ── Footer ─────────────────────────────────────────────────────────────────
-  footerText: `© ${new Date().getFullYear()} Wayfinding Explorer Quiz. Based on "Navigating What's Next".`,
+  footerText: `© ${new Date().getFullYear()} Getting Smart. Based on "Leadership in the Age of Generation Alpha."`,
 
   // ── Mailchimp tag applied to all completions ───────────────────────────────
-  // Must match MAILCHIMP_TAG_NAME env var (or this overrides the default)
-  completionTag: "Explorer Assessment",
+  completionTag: "Leadership Assessment",
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
 // QUESTIONS
-// category drives the 2-axis scoring: INNOVATION score = count of 'B' in
-// INNOVATION questions; COHERENCE score = count of 'B' in COHERENCE questions.
+// 12 questions, 2 per persona (category = persona key).
+// Answer 'B' always maps to that persona; 'A' is the alternative tendency.
+// Scoring: count 'B' answers per category → highest count wins.
 // ─────────────────────────────────────────────────────────────────────────────
 export const QUESTIONS: Question[] = [
-  // Part I: Innovation Depth
+  // ── Learner (Q1–Q2) ────────────────────────────────────────────────────────
   {
     id: 1,
-    category: 'INNOVATION',
-    text: 'Primary Learning Goal',
+    category: 'LEARNER',
+    text: 'When you face a problem you haven\'t seen before, your first instinct is to:',
     options: [
-      { label: 'A', text: 'We prioritize content recall and proficiency measured primarily by test scores.', value: 'A' },
-      { label: 'B', text: 'We prioritize "transferable skills" like curiosity, resilience, and adaptability.', value: 'B' }
+      { label: 'A', text: 'Find someone who has solved it before and apply their approach quickly.', value: 'A' },
+      { label: 'B', text: 'Sit with the question, research deeply, and model that curiosity openly with your team.', value: 'B' },
     ]
   },
   {
     id: 2,
-    category: 'INNOVATION',
-    text: 'The Role of the Learner',
+    category: 'LEARNER',
+    text: 'A staff member challenges a decision you made. You are most likely to:',
     options: [
-      { label: 'A', text: 'Learning is teacher-driven; educators determine the what, how, and when.', value: 'A' },
-      { label: 'B', text: 'Learning is learner-driven; students take ownership and build agency.', value: 'B' }
+      { label: 'A', text: 'Explain your reasoning clearly and move forward with the plan.', value: 'A' },
+      { label: 'B', text: 'Pause, listen deeply with compassion, and genuinely reconsider if their perspective reveals a gap.', value: 'B' },
     ]
   },
+
+  // ── Visionary (Q3–Q4) ──────────────────────────────────────────────────────
   {
     id: 3,
-    category: 'INNOVATION',
-    text: 'The Definition of "Classroom"',
+    category: 'VISIONARY',
+    text: 'When setting goals for your team, you prioritize:',
     options: [
-      { label: 'A', text: 'Learning is primarily confined to a single building or classroom.', value: 'A' },
-      { label: 'B', text: 'Learning unfolds across a network of spaces, including internships and community settings.', value: 'B' }
+      { label: 'A', text: 'Measurable outcomes tied to current performance benchmarks and accountability metrics.', value: 'A' },
+      { label: 'B', text: 'A clear, co-designed community vision that connects daily work to long-term human flourishing.', value: 'B' },
     ]
   },
   {
     id: 4,
-    category: 'INNOVATION',
-    text: 'Evidence of Success',
+    category: 'VISIONARY',
+    text: 'When your system faces pressure from multiple directions at once, you:',
     options: [
-      { label: 'A', text: 'Success is documented through traditional transcripts limited to courses and grades.', value: 'A' },
-      { label: 'B', text: 'Success is documented through mastery-based records that showcase competencies.', value: 'B' }
+      { label: 'A', text: 'Focus on the most urgent issue and manage it one crisis at a time.', value: 'A' },
+      { label: 'B', text: 'Return to the core vision to filter decisions and communicate transparently about trade-offs.', value: 'B' },
     ]
   },
+
+  // ── Catalyst (Q5–Q6) ───────────────────────────────────────────────────────
   {
     id: 5,
-    category: 'INNOVATION',
-    text: 'Design Focus',
+    category: 'CATALYST',
+    text: 'When launching a new initiative, you tend to:',
     options: [
-      { label: 'A', text: 'We focus on adopting specific programs or isolated strategies to solve problems.', value: 'A' },
-      { label: 'B', text: 'We focus on shared "Design Principles" that guide practices across all classrooms.', value: 'B' }
+      { label: 'A', text: 'Drive it yourself to ensure quality and consistency across the organization.', value: 'A' },
+      { label: 'B', text: 'Distribute ownership to your team, building their autonomy and sense of purpose in the work.', value: 'B' },
     ]
   },
-  // Part II: System Coherence
   {
     id: 6,
-    category: 'COHERENCE',
-    text: 'The "North Star" (Mission & Vision)',
+    category: 'CATALYST',
+    text: 'You notice a key team member seems disengaged. Your response is to:',
     options: [
-      { label: 'A', text: 'Our mission lives primarily on posters and rarely guides daily decisions.', value: 'A' },
-      { label: 'B', text: 'Our mission is an actionable commitment that shapes budget and hiring.', value: 'B' }
+      { label: 'A', text: 'Set clearer expectations and monitor their performance more closely.', value: 'A' },
+      { label: 'B', text: 'Explore whether their sense of autonomy, belonging, competence, or purpose has eroded — then redesign accordingly.', value: 'B' },
     ]
   },
+
+  // ── Architect (Q7–Q8) ──────────────────────────────────────────────────────
   {
     id: 7,
-    category: 'COHERENCE',
-    text: 'Adult Alignment',
+    category: 'ARCHITECT',
+    text: 'When you look at how your team spends its time each week, your instinct is to:',
     options: [
-      { label: 'A', text: 'We have clear outcomes for students, but haven\'t defined the capacities adults need.', value: 'A' },
-      { label: 'B', text: 'We use Educator and Leader Portraits to align professional learning and hiring.', value: 'B' }
+      { label: 'A', text: 'Accept the workload as the cost of running a complex organization.', value: 'A' },
+      { label: 'B', text: 'Identify the biggest time-sink and run a design sprint to automate, reallocate, or eliminate it.', value: 'B' },
     ]
   },
   {
     id: 8,
-    category: 'COHERENCE',
-    text: 'Signaling Consistency',
+    category: 'ARCHITECT',
+    text: 'When a veteran staff member leaves your organization, you typically:',
     options: [
-      { label: 'A', text: 'Our reporting, portfolios, and transcripts often feel disconnected from each other.', value: 'A' },
-      { label: 'B', text: 'Our signals are an integrated system that clearly communicates growth.', value: 'B' }
+      { label: 'A', text: 'Hire a replacement and rely on the new hire to learn the role organically.', value: 'A' },
+      { label: 'B', text: 'Recognize the knowledge loss and prioritize building shared playbooks and systems before they leave.', value: 'B' },
     ]
   },
+
+  // ── Cultivator (Q9–Q10) ────────────────────────────────────────────────────
   {
     id: 9,
-    category: 'COHERENCE',
-    text: 'Scalability of Innovation',
+    category: 'CULTIVATOR',
+    text: 'When thinking about professional development for your staff, you focus on:',
     options: [
-      { label: 'A', text: 'Successful practices live in the expertise of individual "hero" teachers.', value: 'A' },
-      { label: 'B', text: 'We codify and share effective practices to turn experience into shared knowledge.', value: 'B' }
+      { label: 'A', text: 'Meeting compliance requirements and ensuring staff are trained on current mandates.', value: 'A' },
+      { label: 'B', text: 'Co-designing a Portrait of an Educator tied to your learning model and building personalized growth pathways.', value: 'B' },
     ]
   },
   {
     id: 10,
-    category: 'COHERENCE',
-    text: 'Strategic Pacing',
+    category: 'CULTIVATOR',
+    text: 'When facing stakeholder resistance to change, you:',
     options: [
-      { label: 'A', text: 'We experience "initiative fatigue"—too many things moving at once.', value: 'A' },
-      { label: 'B', text: 'Our strategy ensures change is intentional, paced, and sequenced.', value: 'B' }
+      { label: 'A', text: 'Push through with strong communication and clear rationale for the direction.', value: 'A' },
+      { label: 'B', text: 'Map stakeholders by belief and trust, invest energy in supporters and fence-sitters, and stop spending equity on entrenched opponents.', value: 'B' },
     ]
-  }
+  },
+
+  // ── Weaver (Q11–Q12) ───────────────────────────────────────────────────────
+  {
+    id: 11,
+    category: 'WEAVER',
+    text: 'When your team is stuck on a persistent challenge, your instinct is to:',
+    options: [
+      { label: 'A', text: 'Convene internal stakeholders and work through the problem from within the organization.', value: 'A' },
+      { label: 'B', text: 'Connect the team to external networks and organizations who have already navigated similar terrain.', value: 'B' },
+    ]
+  },
+  {
+    id: 12,
+    category: 'WEAVER',
+    text: 'When thinking about workforce and community alignment, you:',
+    options: [
+      { label: 'A', text: 'Rely on existing community relationships and occasional employer input to stay informed.', value: 'A' },
+      { label: 'B', text: 'Establish a formal Community Advisory Board that maps workforce needs directly to your education system.', value: 'B' },
+    ]
+  },
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
 // PERSONAS
+// id must match the category values used in QUESTIONS above.
 // ─────────────────────────────────────────────────────────────────────────────
 export const PERSONAS: Record<string, PersonaProfile> = {
-  DRIFTER: {
-    id: 'DRIFTER',
-    name: 'The Drifter',
-    subtitle: 'Low Innovation / Low Coherence',
-    color: 'bg-slate-400',
-    description: 'The Drifter operates in a landscape that is shifting faster than their current structures can support. They often feel reactive and overwhelmed because they lack a core identity or a clear "why" to anchor their efforts.',
+  LEARNER: {
+    id: 'LEARNER',
+    name: 'The Learner',
+    subtitle: 'Curiosity-Driven Leadership',
+    color: 'bg-sky-600',
+    description:
+      'You lead by asking better questions rather than projecting all the answers. You model vulnerability, ' +
+      'prioritize deep listening, and believe that a leader\'s capacity to grow is the organization\'s greatest asset. ' +
+      'In a world of rapid change, your curiosity is contagious — and it builds organizations that can adapt.',
     strengths: [
-      { title: 'Willingness to Act', text: 'Motivated to solve problems and quick to reach for new programs.' },
-      { title: 'Awareness of Pressure', text: 'Acutely aware of external changes and shifting expectations.' },
-      { title: 'Pockets of Dedication', text: 'Individual educators and leaders remain deeply dedicated to students.' }
+      { title: 'Radical Curiosity', text: 'You create psychological safety for questions, experimentation, and learning from failure.' },
+      { title: 'Compassionate Listening', text: 'You slow down to truly hear stakeholders before designing solutions.' },
+      { title: 'Values-Driven Decisions', text: 'Your integrity and reflective practice earn deep organizational trust.' },
+      { title: 'High Expectations', text: 'You hold yourself and your team to clear, adaptive, and meaningful goals.' },
     ],
     weaknesses: [
-      { title: 'Accumulation Without Alignment', text: 'Adopting initiatives without a shared structure leads to inefficiency.' },
-      { title: 'Initiative Fatigue', text: 'High activity with low progress leads to staff burnout.' },
-      { title: 'Reactive Stance', text: 'Reacting to isolated pain points rather than leading with intention.' }
+      { title: 'Analysis Paralysis', text: 'Deep inquiry can sometimes slow decision-making when urgency is required.' },
+      { title: 'Over-Questioning', text: 'Teams may crave more direction than your questioning style naturally provides.' },
+      { title: 'Absorbing Complexity', text: 'You may take on too much uncertainty personally rather than distributing it across the team.' },
     ],
     opportunities: [
-      { title: 'Power of the Pause', text: 'Stepping back to survey the terrain before doing more.' },
-      { title: 'Surfacing Bright Spots', text: 'Identifying where learners thrive to serve as new trail markers.' },
-      { title: 'Community Grounding', text: 'Building trust through authentic listening for future transformation.' }
+      { title: 'Model Learning Publicly', text: 'Share your own learning journey with staff to normalize growth at every level.' },
+      { title: 'Design for Curiosity', text: 'Build structured inquiry time into team meetings and professional learning.' },
+      { title: 'Pair with a Visionary', text: 'Combine your depth of question with a strong strategic north star to accelerate impact.' },
     ],
     habits: [
-      { title: 'Solving Symptoms', text: 'Focusing on fires rather than underlying system patterns.' },
-      { title: 'Program Chasing', text: 'Adopting pre-packaged plans that may not fit local needs.' },
-      { title: 'Disconnected Effort', text: 'Isolated initiatives competing for time and attention.' }
+      { title: 'Curiosity Audits', text: 'Regularly reflecting on your own learning and modeling that vulnerability with your team.' },
+      { title: 'Active Listening Sprints', text: 'Using design sprint noticing phases to deeply understand what stakeholders truly need.' },
+      { title: 'Values Reflection', text: 'Pausing before decisions to check alignment with your articulated values and norms.' },
     ],
     nextSteps: [
-      'Stop adding new initiatives and focus on making sense of the current landscape.',
-      'Conduct a "Listening Tour" to understand what the community truly values.',
-      'Look across existing programs to see what is already working well.',
-      'Establish a common framework to give the team a shared language.'
+      'Conduct a personal curiosity audit — when was your last deep learning dive, and how did you share it?',
+      'Model active listening during your next team meeting by asking questions before offering solutions.',
+      'Articulate a clear set of values and norms for your team and use them explicitly in your next hard decision.',
+      'Set adaptive goals for yourself and ask your team to hold you accountable to them.',
     ]
   },
-  SENTRY: {
-    id: 'SENTRY',
-    name: 'The Sentry',
-    subtitle: 'Low Innovation / High Coherence',
+
+  VISIONARY: {
+    id: 'VISIONARY',
+    name: 'The Visionary',
+    subtitle: 'Strategic Clarity Under Pressure',
     color: 'bg-brand-primary',
-    description: 'The Sentry manages a highly disciplined, efficient organization that is impeccably aligned—but calibrated for the past. They excel at "the game of school" while often overlooking broader future competencies.',
+    description:
+      'You build and sustain strategic clarity even when everything around you is shifting. Whether you\'re a classroom ' +
+      'teacher defining success for every student or a superintendent co-designing a system-wide vision, your ability ' +
+      'to tie daily work to long-term human flourishing is your superpower.',
     strengths: [
-      { title: 'Operational Excellence', text: 'Highly organized machine where internal systems work in harmony.' },
-      { title: 'Clarity and Consistency', text: 'Transparent expectations for students, parents, and staff.' },
-      { title: 'Academic Rigor', text: 'Top performers in traditional metrics and content proficiency.' },
-      { title: 'Strong Standards', text: 'Well-defined routines for evaluation and follow-through.' }
+      { title: 'Coherent Direction', text: 'You connect individual and team goals to a shared community vision that guides daily decisions.' },
+      { title: 'Accountability Culture', text: 'You build in regular reflection cycles that keep the system honest about progress and roadblocks.' },
+      { title: 'Radical Transparency', text: 'You share your own reflections openly, model vulnerability around challenges, and invite input on the roadmap.' },
+      { title: 'Human-Centered Focus', text: 'You keep material well-being, life satisfaction, meaning, and relationships at the center of strategy.' },
     ],
     weaknesses: [
-      { title: 'Static Design', text: 'Optimized for legacy needs, can be rigid and resistant to innovation.' },
-      { title: 'Ambiguity Paralysis', text: 'Students thrive on clear instructions but struggle with open-ended challenges.' },
-      { title: 'Narrow Success Metrics', text: 'May ignore transferable skills like resilience and agency.' },
-      { title: 'Compliance over Coherence', text: 'Alignment built on following rules rather than shared purpose.' }
+      { title: 'Vision Fatigue', text: 'Teams can become numb to vision language if it isn\'t consistently connected to operational reality.' },
+      { title: 'Idealism vs. Urgency', text: 'Long-term clarity can sometimes create friction with the short-cycle demands of day-to-day management.' },
+      { title: 'Alignment Overhead', text: 'Building shared vision takes time and sustained energy that can be hard to protect.' },
     ],
     opportunities: [
-      { title: 'Leveraging Stability', text: 'Using existing capacity to support deep, intentional change.' },
-      { title: 'Expanding the "What"', text: 'Opportunity to include interdisciplinary competencies in the rigor.' },
-      { title: 'Community Re-Engagement', text: 'Integrating community partnerships to bring academic strengths to life.' }
+      { title: 'Co-Design the Vision', text: 'Involve students, families, and staff in articulating the community vision to deepen ownership.' },
+      { title: 'Operationalize the Vision', text: 'Translate vision into explicit budget, hiring, and scheduling decisions to make it real.' },
+      { title: 'Quarterly Vision Check-ins', text: 'Build structured reflection cycles where teams assess progress and surface emerging barriers.' },
     ],
     habits: [
-      { title: 'Protecting the Standard', text: 'Prioritizing current high-performing metrics.' },
-      { title: 'Executing the Playbook', text: 'Disciplined implementation of known legacy practices.' },
-      { title: 'Measuring the Known', text: 'Relying on traditional transcripts and seat time.' }
+      { title: 'Vision Filtering', text: 'Running every major decision through the lens of the community vision before committing.' },
+      { title: 'Transparent Goal Sharing', text: 'Publishing your own goals and progress publicly to model the accountability you expect.' },
+      { title: 'Human Flourishing Metrics', text: 'Tracking indicators of well-being, meaning, and connection alongside academic outcomes.' },
     ],
     nextSteps: [
-      'Revisit the community vision to see if the "aligned machine" serves modern aspirations.',
-      'Begin defining a "Learner Portrait" that adds collaboration and adaptability.',
-      'Introduce small-scale performance tasks or community-connected projects.',
-      'Explore mastery-based signals to provide a holistic narrative of growth.'
+      'Re-ground your system\'s success metrics in human flourishing: stability, satisfaction, health, purpose, character, and relationships.',
+      'Tie every team member\'s individual goals explicitly to the community vision — make the connection visible.',
+      'Build a quarterly reflection ritual where your team surfaces progress and roadblocks connected to the vision.',
+      'Share your own goal reflections openly with staff and invite honest input on the strategic roadmap.',
     ]
   },
-  TRAILBLAZER: {
-    id: 'TRAILBLAZER',
-    name: 'The Trailblazer',
-    subtitle: 'Medium Innovation / Low Coherence',
+
+  CATALYST: {
+    id: 'CATALYST',
+    name: 'The Catalyst',
+    subtitle: 'Distributed Leadership & Unlocked Motivation',
     color: 'bg-orange-500',
-    description: 'The Trailblazer demonstrates "brittle brilliance." Exciting bright spots exist but remain disconnected from the larger organization. Innovation relies on "hero" educators rather than institutional structures.',
+    description:
+      'You understand that the most powerful thing a leader can do is unlock the motivation already present in their ' +
+      'team. Grounded in self-determination theory, you design for autonomy, relatedness, competence, and purpose — ' +
+      'and your teams move faster and more sustainably because of it.',
     strengths: [
-      { title: 'Pockets of Innovation', text: 'Launched exciting practices like learner portraits or expanded pathways.' },
-      { title: 'High Energy', text: 'Fuelled by educators committed to moving beyond legacy models.' },
-      { title: 'Future-Facing Pilots', text: 'Comfortable launching design sprints to test new approaches.' }
+      { title: 'Distributed Ownership', text: 'You build clear decision-making structures that give teams genuine authority and accountability.' },
+      { title: 'Motivation Architecture', text: 'You diagnose and redesign systems when autonomy, belonging, competence, or purpose erodes.' },
+      { title: 'Adaptive Leadership', text: 'You get on the balcony to observe where you\'re enabling vs. micromanaging — and adjust.' },
+      { title: 'Catalytic Culture', text: 'You create conditions where teams accelerate toward the vision under their own energy.' },
     ],
     weaknesses: [
-      { title: 'Fragility', text: 'Bright spots are vulnerable to staff turnover or funding changes.' },
-      { title: 'Inequitable Access', text: 'Learners across the system have uneven access to quality innovation.' },
-      { title: 'Human Weight', text: 'The work feels heavy because the system does not reliably support coherence.' }
+      { title: 'Coordination Cost', text: 'Distributed leadership requires strong communication infrastructure to avoid misalignment.' },
+      { title: 'Accountability Gaps', text: 'Autonomy without clear accountability structures can leave important work falling through the cracks.' },
+      { title: 'Tolerance for Ambiguity', text: 'Not all team members thrive in high-autonomy environments — some need more structure to succeed.' },
     ],
     opportunities: [
-      { title: 'Codifying the Learning', text: 'Turning successful local practices into playbooks or guides.' },
-      { title: 'Aligning the Signals', text: 'Ensuring transcripts reflect the innovation happening in pilots.' },
-      { title: 'Building Adult Capacity', text: 'Defining an Educator Portrait to support all teachers.' }
+      { title: 'Explicit Decision Frameworks', text: 'Build a shared system that clarifies who decides what, how, and when across the organization.' },
+      { title: 'Motivation Diagnostics', text: 'Run regular team reflections on autonomy, relatedness, competence, and purpose to catch erosion early.' },
+      { title: 'Leadership Pipeline', text: 'Use distributed leadership as a deliberate strategy for developing your next generation of leaders.' },
     ],
     habits: [
-      { title: 'Pioneering', text: 'Launching new projects that push traditional boundaries.' },
-      { title: 'Relational Trust', text: 'Relying on informal networks to share ideas.' },
-      { title: 'Trial and Error', text: 'Using a "hackathon" mindset to test classroom experiences.' }
+      { title: 'Balcony Observation', text: 'Daily or weekly journaling to track where you\'re enabling autonomy vs. inadvertently micromanaging.' },
+      { title: 'Decision Mapping', text: 'Maintaining visible clarity on who owns which decisions and how they\'re made.' },
+      { title: 'Motivation Check-ins', text: 'Asking teams to reflect on autonomy, relatedness, competence, and purpose before and during major projects.' },
     ],
     nextSteps: [
-      'Move from informal sharing to formal codification to protect practices.',
-      'Use a common framework to connect innovations across different areas.',
-      'Determine which practices are ready to be expanded system-wide.',
-      'Sequence efforts thoughtfully to avoid "initiative fatigue."'
+      'Establish a clear system-wide decision framework: who decides, how it\'s decided, and when.',
+      'Start a 5-minute end-of-day observation journal to track where you\'re enabling autonomy vs. micromanaging.',
+      'Ask your team to individually reflect on autonomy, relatedness, competency, and purpose — and use the results to redesign.',
+      'Identify one leader on your team who is ready for more ownership and deliberately expand their decision-making authority.',
     ]
   },
-  SURVEYOR: {
-    id: 'SURVEYOR',
-    name: 'The Surveyor',
-    subtitle: 'Medium Innovation / High Coherence',
+
+  ARCHITECT: {
+    id: 'ARCHITECT',
+    name: 'The Architect',
+    subtitle: 'Systems Design for Time and Scale',
+    color: 'bg-violet-600',
+    description:
+      'You are relentlessly focused on designing systems and structures that give your team back the one resource ' +
+      'they can never recover: time. By automating, eliminating, and codifying knowledge, you create the conditions ' +
+      'for high-quality relationships, better learning experiences, and continuous improvement.',
+    strengths: [
+      { title: 'Time Recovery', text: 'You identify and eliminate administrative time-sinks that steal capacity from high-value work.' },
+      { title: 'Operational Innovation', text: 'You use generative technology and design thinking to reimagine routine tasks.' },
+      { title: 'Knowledge Management', text: 'You build shared playbooks that make institutional wisdom portable and resilient to turnover.' },
+      { title: 'Continuous Improvement', text: 'You design sprint cycles that give teams structured space to iterate and improve.' },
+    ],
+    weaknesses: [
+      { title: 'Over-Engineering', text: 'Complex systems can create new burdens if not designed with the end user in mind.' },
+      { title: 'Change Resistance', text: 'Operational redesign often meets resistance from staff comfortable with existing routines.' },
+      { title: 'Execution Dependency', text: 'Great system design requires sustained implementation discipline that can be hard to maintain.' },
+    ],
+    opportunities: [
+      { title: 'AI-Powered Operations', text: 'Use generative AI to reduce time on routine tasks and redirect capacity toward students and staff.' },
+      { title: 'Design Sprint Culture', text: 'Embed regular design sprints into the organizational calendar for continuous operational improvement.' },
+      { title: 'Onboarding Architecture', text: 'Build robust knowledge management systems that dramatically shorten the ramp time for new hires.' },
+    ],
+    habits: [
+      { title: 'Time Auditing', text: 'Regularly mapping where team time goes and ruthlessly questioning whether each category serves the vision.' },
+      { title: 'Playbook Building', text: 'Documenting the community vision, learning model, and key processes in shared, living documents.' },
+      { title: 'Sprint Facilitation', text: 'Running structured design sprints to automate, reallocate, or eliminate operational inefficiencies.' },
+    ],
+    nextSteps: [
+      'Identify the single largest non-essential time-sink in your organization and run a design sprint to eliminate or automate it.',
+      'Choose one routine task and use generative AI to build a tool that reduces the time your team spends on it.',
+      'Build a shared playbook that documents your community vision, learning model, signals, ecosystem, and strategy.',
+      'Design an onboarding system that transfers institutional knowledge to new staff in their first 90 days.',
+    ]
+  },
+
+  CULTIVATOR: {
+    id: 'CULTIVATOR',
+    name: 'The Cultivator',
+    subtitle: 'Conditions, Capacity & Commitment',
     color: 'bg-teal-600',
-    description: 'The Surveyor represents a system in transition, mapping new terrain while keeping traditional roads functional. They use steadying tools to identify patterns and clarify priorities.',
+    description:
+      'You shape the invisible architecture of your organization: the conditions, culture, and commitment that ' +
+      'determine whether meaningful change takes root or withers. While others focus on programs and initiatives, ' +
+      'you tend the soil — ensuring your team has the belief, skills, and environment to sustain transformation.',
     strengths: [
-      { title: 'Intentional Movement', text: 'Actively charting a coherent path across all elements.' },
-      { title: 'Methodical Alignment', text: 'Skilled at naming what exists and ensuring reinforcement.' },
-      { title: 'Strategic Sequencing', text: 'Using strategy to prioritize and sustain work over time.' },
-      { title: 'Balanced Perspective', text: 'Recognizing the continuum of traditional and transformational elements.' }
+      { title: 'Condition Setting', text: 'You diagnose and remove the systemic barriers that prevent your team from doing their best work.' },
+      { title: 'Capacity Building', text: 'You co-design educator portraits and personalized professional learning tied to your learning model.' },
+      { title: 'Commitment Growing', text: 'You ensure staff can articulate the reasons for change — and believe in the destination.' },
+      { title: 'Stakeholder Strategy', text: 'You map stakeholders with precision and invest your energy where it produces the most leverage.' },
     ],
     weaknesses: [
-      { title: 'Tension of Currents', text: 'Pulled between daily legacy realities and future-focused shifts.' },
-      { title: 'Operational Friction', text: 'Maintaining dual models simultaneously can create temporary frustration.' },
-      { title: 'Pacing Challenges', text: 'Struggling to find the right speed for the culture to absorb.' }
+      { title: 'Slow Burn', text: 'Culture and capacity work takes time — results can feel invisible in the short term.' },
+      { title: 'Measurement Challenges', text: 'Conditions and commitment are harder to quantify than program outcomes.' },
+      { title: 'Energy Drain', text: 'Tending to culture and individual stakeholders is deeply relational work that can deplete even strong leaders.' },
     ],
     opportunities: [
-      { title: 'Leading with Coherence', text: 'Building adult capacity to move into transformational territory.' },
-      { title: 'Codification of Practice', text: 'Creating a robust system for capturing best practices.' },
-      { title: 'Strategic Finance', text: 'Connecting financial decisions explicitly to learner outcomes.' }
+      { title: 'Portrait of an Educator', text: 'Co-design educator competency portraits that anchor professional learning to the learning model.' },
+      { title: 'Barrier Removal Cycles', text: 'Run quarterly staff surveys to surface systemic barriers and use them to drive R&D cycles.' },
+      { title: 'Stakeholder Mapping', text: 'Use power/interest or belief/trust matrices to prioritize your relationship investment strategically.' },
     ],
     habits: [
-      { title: 'Mapping Progress', text: 'Regularly taking stock of what is shifting and emerging.' },
-      { title: 'Checking the Compass', text: 'Aligning daily decisions with the long-term destination.' },
-      { title: 'Disciplined Observation', text: 'Gathering evidence about barriers and successes.' }
+      { title: 'Quarterly Barrier Surveys', text: 'Regularly asking staff what is getting in the way of their best work — and acting on the answers.' },
+      { title: 'Stakeholder Mapping', text: 'Maintaining a living map of stakeholders by belief/trust or power/interest to guide relationship energy.' },
+      { title: 'Commitment Conversations', text: 'Regularly checking that staff can articulate and believe in the system\'s direction.' },
     ],
     nextSteps: [
-      'Ensure the Community Vision actively shapes programmatic choices.',
-      'Transition from teacher-driven instruction toward facilitation practices.',
-      'Invite partners into the building to blur school/community boundaries.',
-      'Analyze how learning can travel with integrity across the entire system.'
+      'Launch a quarterly staff survey asking: what are the biggest barriers to achieving the best outcomes for every student?',
+      'Co-design a Portrait of an Educator connected to your learning model and build professional learning around its competencies.',
+      'Map your stakeholders by belief and trust — invest in supporters and fence-sitters, and stop spending equity on entrenched opponents.',
+      'Identify one systemic condition (policy, culture, funding, or structure) that is limiting your team and run an improvement cycle to address it.',
     ]
   },
-  SCOUT: {
-    id: 'SCOUT',
-    name: 'The Scout',
-    subtitle: 'High Innovation / Low Coherence',
-    color: 'bg-emerald-600',
-    description: 'The Scout represents a system transformational in its depth of innovation but fragmented in its coherence. They are out in front exploring but lack connectivity to bring discoveries home.',
-    strengths: [
-      { title: 'Attuned to the Future', text: 'Highly sensitive to the need to move away from legacy models.' },
-      { title: 'Bold Experimentation', text: 'Testing new definitions of "classroom" and learning networks.' },
-      { title: 'Learner-Driven Mentality', text: 'Prioritizing agency and student ownership of learning.' },
-      { title: 'Skill Focus', text: 'Value curiosity, resilience, and adaptability over content recall.' }
-    ],
-    weaknesses: [
-      { title: 'Disconnected Discoveries', text: 'Isolated findings don\'t influence the wider organization.' },
-      { title: 'Fragile Progress', text: 'Work is vulnerable to leadership transitions or shifts in focus.' },
-      { title: 'Communication Gaps', text: 'Lack internal protocols to share learnings with traditional parts.' },
-      { title: 'Initiative Overload', text: 'Contributing to fatigue without a stable, paced strategy.' }
-    ],
-    opportunities: [
-      { title: 'Building the Adult Layer', text: 'Normalizing transformational practices across all educators.' },
-      { title: 'System Integration', text: 'Using a shared compass to connect isolated "lookouts."' },
-      { title: 'Scaling through Codification', text: 'Turning discoveries into playbooks for others to navigate.' }
-    ],
-    habits: [
-      { title: 'Horizon Scanning', text: 'Constantly looking for new tools and models.' },
-      { title: 'Pioneering', text: 'Launching pilots that move beyond physical and time boundaries.' },
-      { title: 'Advocating', text: 'Championing mastery-based records and broader success definitions.' }
-    ],
-    nextSteps: [
-      'Revisit mission/vision to ensure they can hold the weight of transformational discoveries.',
-      'Build "connective trails" between innovation and existing system supports.',
-      'Develop skills for every educator, not just the early adopters.',
-      'Transition from solo explorer to a leader of collective movement.'
-    ]
-  },
-  WAYFINDER: {
-    id: 'WAYFINDER',
-    name: 'The Wayfinder',
-    subtitle: 'High Innovation / High Coherence',
+
+  WEAVER: {
+    id: 'WEAVER',
+    name: 'The Weaver',
+    subtitle: 'Networks, Talent & Community Connection',
     color: 'bg-amber-600',
-    description: 'The Wayfinder represents the most advanced stage of system leadership. They use a living compass to navigate uncertainty, moving from compliance toward deep coherence.',
+    description:
+      'You systematically combat the isolation that makes school transformation so hard. You connect your team to ' +
+      'the broader ecosystem of networks, talent, and community partners — ensuring your organization is never ' +
+      'solving problems in a vacuum and always accelerating through shared knowledge.',
     strengths: [
-      { title: 'Actionable Vision', text: 'Mission shapes budget, hiring, and daily project choices.' },
-      { title: 'Whole-Learner Focus', text: 'Signals make student growth visible across the entire system.' },
-      { title: 'Interconnected Systems', text: 'Staffing, professional learning, and facilities are all aligned.' },
-      { title: 'Trust and Culture', text: 'Fostering psychological safety and treating change as shared learning.' }
+      { title: 'Network Intelligence', text: 'You tap external knowledge networks to bring outside learning into your organization before others do.' },
+      { title: 'Cross-Sector Coordination', text: 'You build formal structures like Community Advisory Boards that align education to workforce needs.' },
+      { title: 'Talent Acceleration', text: 'You connect your team to external partners — NAF, New Tech Network, Big Picture, CAPS — to accelerate transformation.' },
+      { title: 'Anti-Isolation', text: 'You deliberately break down the silos that keep educators building the same solutions independently.' },
     ],
     weaknesses: [
-      { title: 'Complexity Fatigue', text: 'High volume of "meaningful movement" can lead to burnout.' },
-      { title: 'Inward Rotation', text: 'Risk of ignoring external shifts due to intense internal focus.' },
-      { title: 'Fidelity vs. Flexibility', text: 'Balancing core design principles with school autonomy.' }
+      { title: 'Breadth vs. Depth', text: 'Wide external networks can sometimes come at the cost of deep internal organizational development.' },
+      { title: 'Partnership Overhead', text: 'Managing external relationships requires time and coordination that can strain lean teams.' },
+      { title: 'Signal vs. Noise', text: 'Broad network access means filtering for the most relevant insights becomes a critical skill.' },
     ],
     opportunities: [
-      { title: 'Scaling with Integrity', text: 'Expanding high-impact practices without diluting quality.' },
-      { title: 'AI as a Design Partner', text: 'Integrating tools to enhance personalization and coaching.' },
-      { title: 'Regional Influence', text: 'Leading networks and marking the trail for neighboring systems.' }
+      { title: 'Regional Network Leadership', text: 'Start or join a regional learning network to pool resources and accelerate collective transformation.' },
+      { title: 'Community Advisory Board', text: 'Establish a formal board that maps local workforce needs to your education system.' },
+      { title: 'Partner Network Integration', text: 'Plug your team into NAF, New Tech Network, Big Picture Learning, or CAPS to access proven models.' },
     ],
     habits: [
-      { title: 'Noticing', text: 'Keeping leaders attuned to real-time events in the community.' },
-      { title: 'Observing', text: 'Applying disciplined attention to evidence and barriers.' },
-      { title: 'Reflecting', text: 'Turning insights into actionable learning for the system.' }
+      { title: 'Network Brokering', text: 'Regularly making and offering connections between your team and external organizations with relevant expertise.' },
+      { title: 'Advisory Facilitation', text: 'Convening cross-sector stakeholders to keep education aligned with community and workforce evolution.' },
+      { title: 'Outward Scanning', text: 'Continuously looking beyond your organization\'s walls for models, partners, and resources.' },
     ],
     nextSteps: [
-      'Treat coherence not as a destination but as a durable, regular practice.',
-      'Continuously look outward for regional partnerships or economic shifts.',
-      'Ensure system wisdom is documented in playbooks for future leadership.'
+      'Connect your team to at least one external knowledge network this quarter — Future of Learning Council, Real World Learning, or similar.',
+      'Establish a Community Advisory Board that maps local workforce needs directly to your education system.',
+      'Explore formal partnerships with networks like NAF, New Tech Network, Big Picture Learning, or CAPS.',
+      'Identify one problem your team is solving in isolation and find an external organization that has already cracked it.',
     ]
-  }
+  },
 };
